@@ -1,0 +1,621 @@
+/* =========================================
+   HabiTrack — Design tokens
+   ========================================= */
+:root {
+  color-scheme: dark light;
+
+  /* Color */
+  --bg: #16130f;
+  --surface: #201c17;
+  --surface-hover: #2a251e;
+  --border: #322c24;
+  --text-primary: #f4efe6;
+  --text-secondary: #9a9186;
+
+  /* Acento único de marca: verde menta claro (del logo) */
+  --mint: #3ecf8e;
+  --mint-soft: rgba(62, 207, 142, 0.16);
+  --on-accent: #10241a; /* texto/íconos sobre superficies de acento, siempre oscuro */
+
+  /* Verde secundario, más apagado — para el estado "cumplido" */
+  --sage: #7fb894;
+
+  /* Prioridad (fijos, no dependen del tema; escala de urgencia, no decorativa) */
+  --priority-high: #e0645a;
+  --priority-high-soft: rgba(224, 100, 90, 0.16);
+  --priority-medium: #e8b339;
+  --priority-medium-soft: rgba(232, 179, 57, 0.18);
+  --priority-low: #9a9186;
+  --priority-low-soft: rgba(154, 145, 134, 0.16);
+
+  /* Type */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Layout */
+  --radius: 14px;
+  --gap: 12px;
+  --page-padding: 20px;
+}
+
+/* Modo claro: se activa solo si el sistema operativo lo pide. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f8f6;
+    --surface: #ffffff;
+    --surface-hover: #eef4f0;
+    --border: #dbe3de;
+    --text-primary: #1a2620;
+    --text-secondary: #6b7a72;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  padding-bottom: 96px; /* espacio para que el FAB no tape el último hábito */
+}
+
+/* =========================================
+   Header
+   ========================================= */
+.app-header {
+  padding: 28px var(--page-padding) 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.app-header__logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.app-header__tagline {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.app-header__date {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* =========================================
+   Resumen de constancia (franja tipo GitHub)
+   ========================================= */
+.overview {
+  padding: 18px var(--page-padding) 6px;
+}
+
+.overview__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.overview__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.overview__fraction {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.overview__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.overview__nav-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overview__nav-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.overview__nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.overview__nav-btn:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
+
+.overview__month-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-width: 130px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.overview__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.overview__weekdays span {
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.overview__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.overview__cell {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.overview__cell--empty {
+  background: transparent;
+}
+
+.overview__cell--future {
+  opacity: 0.45;
+}
+
+.overview__cell--filled {
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.overview__cell--today {
+  outline: 1.5px solid var(--mint);
+  outline-offset: 1px;
+}
+
+/* =========================================
+   Habit list — agrupado por prioridad ("ventanitas")
+   ========================================= */
+.habit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 12px var(--page-padding) var(--page-padding);
+}
+
+.priority-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.priority-group__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+.priority-group__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.priority-group__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+.priority-group__count {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.priority-group__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.habit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: background 0.15s ease;
+}
+
+.habit-card:hover {
+  background: var(--surface-hover);
+}
+
+.habit-card--done {
+  border-color: var(--sage);
+}
+
+/* --- El "eslabón": botón circular que marca cumplido --- */
+.habit-toggle {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2.5px solid var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+
+.habit-toggle:active {
+  transform: scale(0.92);
+}
+
+.habit-toggle:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
+
+.habit-toggle--done {
+  border-color: var(--sage);
+  background: var(--sage);
+}
+
+.habit-toggle__check {
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.habit-toggle--done .habit-toggle__check {
+  opacity: 1;
+}
+
+/* --- Info del hábito --- */
+.habit-info {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.habit-info:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
+
+.habit-info__name {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.habit-info__name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.habit-info__frequency {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* --- Racha --- */
+.habit-streak {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--mint-soft);
+  padding: 5px 10px;
+  border-radius: 100px;
+}
+
+.habit-streak__count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--mint);
+}
+
+.habit-streak--zero {
+  background: transparent;
+}
+
+.habit-streak--zero .habit-streak__count {
+  color: var(--text-secondary);
+}
+
+/* =========================================
+   Empty state
+   ========================================= */
+.empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 48px var(--page-padding);
+  font-size: 0.9rem;
+}
+
+/* =========================================
+   Floating action button
+   ========================================= */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--mint);
+  color: var(--on-accent);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(62, 207, 142, 0.35);
+  transition: transform 0.15s ease;
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+}
+
+.fab:active {
+  transform: scale(0.94);
+}
+
+.fab:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 3px;
+}
+
+/* =========================================
+   Responsive: tablet / desktop
+   ========================================= */
+@media (min-width: 640px) {
+  .habit-list,
+  .overview,
+  .app-header {
+    max-width: 560px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* =========================================
+   Modal: crear / editar hábito
+   ========================================= */
+.habit-modal {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-primary);
+  padding: 0;
+  width: min(400px, calc(100vw - 40px));
+}
+
+.habit-modal::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.habit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+
+.habit-form__title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.field-group {
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.text-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}
+
+.text-input:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 1px;
+}
+
+/* --- Frecuencia: pastillas de radio --- */
+.radio-row {
+  display: flex;
+  gap: 8px;
+}
+
+.radio-pill {
+  flex: 1;
+  position: relative;
+  text-align: center;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.radio-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio-pill:has(input:checked) {
+  border-color: var(--mint);
+  color: var(--text-primary);
+  background: var(--mint-soft);
+}
+
+.radio-pill:has(input:focus-visible) {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
+
+/* --- Prioridad: mismas pastillas, coloreadas por nivel de urgencia --- */
+.priority-row .radio-pill[data-level="high"]:has(input:checked) {
+  border-color: var(--priority-high);
+  background: var(--priority-high-soft);
+  color: var(--text-primary);
+}
+
+.priority-row .radio-pill[data-level="medium"]:has(input:checked) {
+  border-color: var(--priority-medium);
+  background: var(--priority-medium-soft);
+  color: var(--text-primary);
+}
+
+.priority-row .radio-pill[data-level="low"]:has(input:checked) {
+  border-color: var(--priority-low);
+  background: var(--priority-low-soft);
+  color: var(--text-primary);
+}
+
+/* --- Botones del formulario --- */
+.habit-form__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.habit-form__actions-right {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn--primary {
+  background: var(--mint);
+  color: var(--on-accent);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn--danger {
+  background: transparent;
+  color: #e0645a;
+  font-size: 0.82rem;
+  padding: 10px 4px;
+}
+
+/* Respeta preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
