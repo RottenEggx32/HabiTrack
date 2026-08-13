@@ -20,6 +20,10 @@
   /* Verde secundario, más apagado — para el estado "cumplido" */
   --sage: #7fb894;
 
+  /* Comodín: violeta suave, deliberadamente distinto del verde,
+     para que nunca se confunda con un cumplimiento real */
+  --wildcard: #a48ee0;
+
   /* Prioridad (fijos, no dependen del tema; escala de urgencia, no decorativa) */
   --priority-high: #e0645a;
   --priority-high-soft: rgba(224, 100, 90, 0.16);
@@ -281,8 +285,8 @@ body {
   border-radius: var(--radius);
   padding: 14px 16px;
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 10px;
   transition: background 0.15s ease;
 }
 
@@ -292,6 +296,40 @@ body {
 
 .habit-card--done {
   border-color: var(--sage);
+}
+
+.habit-card__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.habit-card__extra {
+  padding-left: 54px; /* alinea con el texto del hábito (40px del toggle + 14px de gap) */
+}
+
+.wildcard-btn {
+  background: none;
+  border: 1px dashed var(--wildcard);
+  color: var(--wildcard);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 100px;
+  cursor: pointer;
+}
+
+.wildcard-btn:hover {
+  background: rgba(164, 142, 224, 0.12);
+}
+
+.wildcard-btn--active {
+  border-style: solid;
+}
+
+.wildcard-btn:focus-visible {
+  outline: 2px solid var(--wildcard);
+  outline-offset: 2px;
 }
 
 /* --- El "eslabón": botón circular que marca cumplido --- */
@@ -455,12 +493,19 @@ body {
    Modal: crear / editar hábito
    ========================================= */
 .habit-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text-primary);
   padding: 0;
   width: min(400px, calc(100vw - 40px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
 }
 
 .habit-modal::backdrop {
@@ -611,6 +656,35 @@ body {
   color: #e0645a;
   font-size: 0.82rem;
   padding: 10px 4px;
+}
+
+/* =========================================
+   Toast: mensajes de refuerzo en hitos
+   ========================================= */
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translate(-50%, -12px);
+  background: var(--surface);
+  border: 1px solid var(--mint);
+  color: var(--text-primary);
+  padding: 10px 18px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  max-width: calc(100vw - 40px);
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 /* Respeta preferencia de movimiento reducido */

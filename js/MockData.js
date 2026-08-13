@@ -82,3 +82,10 @@ const habit_logs = [
 
   // h4 "Repasar finanzas" (semanal): sin registros todavía
 ];
+
+// ---- Tabla: habit_wildcards ----
+// El "día comodín": un registro por semana ISO en el que el
+// usuario decidió perdonar una falla sin romper la racha.
+// Separado de habit_logs a propósito: NO es un cumplimiento
+// real, es un permiso especial para ese día.
+const habit_wildcards = [];

@@ -30,6 +30,11 @@ const submitHabitBtn = document.getElementById('submitHabitBtn');
 const deleteHabitBtn = document.getElementById('deleteHabitBtn');
 const cancelHabitBtn = document.getElementById('cancelHabitBtn');
 
+// --- Toast de refuerzo ---
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+const STREAK_MILESTONES = [7, 30, 100];
+
 const TODAY = isoDateOffset(0);
 
 // Mes que se está mostrando actualmente en el calendario.
@@ -60,17 +65,45 @@ function isCompletedOn(habitId, dateStr) {
 }
 
 /**
- * Calcula la racha ACTUAL de un hábito diario: cuenta días
- * consecutivos con registro, empezando desde hoy hacia atrás.
- * Si hoy todavía no está marcado, no rompe la racha: seguimos
- * contando desde ayer (el usuario todavía tiene el día para
- * cumplir).
+ * ¿Se usó el comodín exactamente en esta fecha para este hábito?
+ */
+function hasWildcardOn(habitId, dateStr) {
+  return habit_wildcards.some(
+    (w) => w.habit_id === habitId && w.used_date === dateStr
+  );
+}
+
+/**
+ * ¿Ya se gastó el comodín de ESTA semana para este hábito
+ * (en cualquier día de la semana, no solo hoy)?
+ * Solo se permite uno por semana.
+ */
+function isWeekWildcardUsed(habitId, dateStr) {
+  const weekKey = getIsoWeekKey(dateStr);
+  return habit_wildcards.some(
+    (w) => w.habit_id === habitId && w.week_key === weekKey
+  );
+}
+
+/**
+ * Un día "cuenta" para la racha si el hábito se cumplió de
+ * verdad, O si ese día específico fue cubierto con el comodín.
+ */
+function dayCountsForStreak(habitId, dateStr) {
+  return isCompletedOn(habitId, dateStr) || hasWildcardOn(habitId, dateStr);
+}
+
+/**
+ * Calcula la racha ACTUAL de un hábito diario. Un día cuenta
+ * si se cumplió de verdad, O si ese día se cubrió con el
+ * comodín (guardado explícitamente por el usuario en
+ * habit_wildcards — no se detecta solo, hay que haberlo usado).
  */
 function calculateDailyStreak(habitId) {
   let streak = 0;
-  let offset = isCompletedOn(habitId, TODAY) ? 0 : -1;
+  let offset = dayCountsForStreak(habitId, TODAY) ? 0 : -1;
 
-  while (isCompletedOn(habitId, isoDateOffset(offset))) {
+  while (dayCountsForStreak(habitId, isoDateOffset(offset))) {
     streak++;
     offset--;
   }
@@ -116,6 +149,35 @@ function calculateStreak(habit) {
 }
 
 /**
+ * Muestra un mensaje flotante breve (3 segundos) y se oculta solo.
+ * role="status" + aria-live ya están en el HTML, así que un
+ * lector de pantalla también lo anuncia sin que hagamos nada más.
+ */
+function showToast(message) {
+  toastEl.textContent = message;
+  toastEl.classList.add('toast--visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toastEl.classList.remove('toast--visible');
+  }, 3000);
+}
+
+/**
+ * Revisa si la racha actual de un hábito cayó justo en un hito
+ * (7, 30, 100...) y si es así, celebra con el toast. Solo aplica
+ * a hábitos diarios, que es donde tienen sentido esos números.
+ */
+function checkStreakMilestone(habitId) {
+  const habit = habits.find((h) => h.id === habitId);
+  if (!habit || habit.frequency !== 'daily') return;
+
+  const streak = calculateDailyStreak(habit.id);
+  if (STREAK_MILESTONES.includes(streak)) {
+    showToast(`🔥 ¡${streak} días seguidos con "${habit.name}"!`);
+  }
+}
+
+/**
  * Marca o desmarca un hábito como cumplido HOY.
  * Si ya estaba marcado, quita el log (permite corregir un error).
  */
@@ -133,6 +195,33 @@ function toggleHabitToday(habitId) {
       completed_date: TODAY,
       created_at: TODAY,
     });
+    checkStreakMilestone(habitId);
+  }
+
+  renderHabits();
+}
+
+/**
+ * Usa (o deshace) el comodín de HOY para un hábito.
+ * Solo tiene efecto si el hábito es diario, no está cumplido
+ * hoy, y no se ha usado ya el comodín de esta semana.
+ */
+function toggleWildcardToday(habitId) {
+  const existingIndex = habit_wildcards.findIndex(
+    (w) => w.habit_id === habitId && w.used_date === TODAY
+  );
+
+  if (existingIndex >= 0) {
+    habit_wildcards.splice(existingIndex, 1);
+  } else {
+    habit_wildcards.push({
+      id: `w-${Date.now()}`,
+      habit_id: habitId,
+      week_key: getIsoWeekKey(TODAY),
+      used_date: TODAY,
+      created_at: TODAY,
+    });
+    checkStreakMilestone(habitId);
   }
 
   renderHabits();
@@ -141,9 +230,14 @@ function toggleHabitToday(habitId) {
 function createHabitCard(habit) {
   const done = isCompletedOn(habit.id, TODAY);
   const streak = calculateStreak(habit);
+  const wildcardToday = hasWildcardOn(habit.id, TODAY);
+  const weekWildcardUsed = isWeekWildcardUsed(habit.id, TODAY);
 
   const card = document.createElement('article');
   card.className = `habit-card${done ? ' habit-card--done' : ''}`;
+
+  const mainRow = document.createElement('div');
+  mainRow.className = 'habit-card__main';
 
   const toggle = document.createElement('button');
   toggle.className = `habit-toggle${done ? ' habit-toggle--done' : ''}`;
@@ -182,7 +276,31 @@ function createHabitCard(habit) {
     <span class="habit-streak__count">${streak}</span>
   `;
 
-  card.append(toggle, info, streakBadge);
+  mainRow.append(toggle, info, streakBadge);
+  card.appendChild(mainRow);
+
+  // --- Fila del comodín: solo aparece cuando tiene sentido ---
+  // Diario, y (ya está cubierto hoy) O (falta hoy Y todavía queda
+  // el comodín de esta semana sin usar).
+  const showWildcardRow =
+    habit.frequency === 'daily' && (wildcardToday || (!done && !weekWildcardUsed));
+
+  if (showWildcardRow) {
+    const wildcardRow = document.createElement('div');
+    wildcardRow.className = 'habit-card__extra';
+
+    const wildcardBtn = document.createElement('button');
+    wildcardBtn.type = 'button';
+    wildcardBtn.className = `wildcard-btn${wildcardToday ? ' wildcard-btn--active' : ''}`;
+    wildcardBtn.textContent = wildcardToday
+      ? '🃏 Comodín usado hoy — deshacer'
+      : '🃏 Usar comodín de esta semana';
+    wildcardBtn.addEventListener('click', () => toggleWildcardToday(habit.id));
+
+    wildcardRow.appendChild(wildcardBtn);
+    card.appendChild(wildcardRow);
+  }
+
   return card;
 }
 
@@ -409,10 +527,15 @@ deleteHabitBtn.addEventListener('click', () => {
   const habitIndex = habits.findIndex((h) => h.id === editingHabitId);
   habits.splice(habitIndex, 1);
 
-  // También limpiamos sus logs, para no dejar registros huérfanos.
+  // También limpiamos sus logs y comodines, para no dejar registros huérfanos.
   for (let i = habit_logs.length - 1; i >= 0; i--) {
     if (habit_logs[i].habit_id === editingHabitId) {
       habit_logs.splice(i, 1);
+    }
+  }
+  for (let i = habit_wildcards.length - 1; i >= 0; i--) {
+    if (habit_wildcards[i].habit_id === editingHabitId) {
+      habit_wildcards.splice(i, 1);
     }
   }
 
