@@ -10,109 +10,161 @@
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="app-header__brand">
-      <span class="app-header__logo">HabiTrack</span>
-      <span class="app-header__tagline">Tus hábitos hablan por ti</span>
-    </div>
-    <p class="app-header__date" id="todayLabel"></p>
-  </header>
+  <!-- =========================================
+       Pantalla de login / registro
+       Se muestra cuando NO hay sesión activa.
+       ========================================= -->
+  <div class="auth-view" id="authView">
+    <div class="auth-card">
+      <p class="auth-card__logo">HabiTrack</p>
+      <p class="auth-card__tagline">Tus hábitos hablan por ti</p>
 
-  <main class="view" id="todayView">
-
-    <section class="overview" id="overviewStrip">
-      <div class="overview__header">
-        <span class="overview__title">Tu constancia</span>
-        <span class="overview__fraction" id="overviewFraction"></span>
-      </div>
-
-      <div class="overview__nav">
-        <button type="button" class="overview__nav-btn" id="prevMonthBtn" aria-label="Mes anterior">‹</button>
-        <span class="overview__month-label" id="overviewMonthLabel"></span>
-        <button type="button" class="overview__nav-btn" id="nextMonthBtn" aria-label="Mes siguiente">›</button>
-      </div>
-
-      <div class="overview__weekdays">
-        <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
-      </div>
-
-      <div class="overview__grid" id="overviewGrid"></div>
-    </section>
-
-    <div class="habit-list" id="habitList">
-      <!-- Los hábitos se renderizan aquí dinámicamente desde app.js -->
-    </div>
-
-    <p class="empty-state" id="emptyState" hidden>
-      Todavía no tienes hábitos. Toca el botón "+" para crear el primero.
-    </p>
-
-  </main>
-
-  <button class="fab" id="newHabitBtn" aria-label="Nuevo hábito">
-    <span aria-hidden="true">+</span>
-  </button>
-
-  <dialog class="habit-modal" id="habitModal">
-    <form class="habit-form" id="habitForm">
-      <h2 class="habit-form__title" id="habitModalTitle">Nuevo hábito</h2>
-
-      <label class="field-label" for="habitName">Nombre</label>
+      <label class="field-label" for="authEmail">Correo</label>
       <input
-        type="text"
-        id="habitName"
+        type="email"
+        id="authEmail"
         class="text-input"
-        maxlength="40"
-        placeholder="p. ej. Leer 20 minutos"
+        placeholder="tucorreo@ejemplo.com"
+        autocomplete="email"
         required
       >
 
-      <fieldset class="field-group">
-        <legend class="field-label">Frecuencia</legend>
-        <div class="radio-row">
-          <label class="radio-pill">
-            <input type="radio" name="frequency" value="daily" checked>
-            <span>Diario</span>
-          </label>
-          <label class="radio-pill">
-            <input type="radio" name="frequency" value="weekly">
-            <span>Semanal</span>
-          </label>
-        </div>
-      </fieldset>
+      <label class="field-label" for="authPassword">Contraseña</label>
+      <input
+        type="password"
+        id="authPassword"
+        class="text-input"
+        placeholder="Mínimo 6 caracteres"
+        minlength="6"
+        autocomplete="current-password"
+        required
+      >
 
-      <fieldset class="field-group">
-        <legend class="field-label">Prioridad</legend>
-        <div class="radio-row priority-row">
-          <label class="radio-pill" data-level="high">
-            <input type="radio" name="priority" value="high">
-            <span>Alta</span>
-          </label>
-          <label class="radio-pill" data-level="medium">
-            <input type="radio" name="priority" value="medium" checked>
-            <span>Media</span>
-          </label>
-          <label class="radio-pill" data-level="low">
-            <input type="radio" name="priority" value="low">
-            <span>Baja</span>
-          </label>
-        </div>
-      </fieldset>
+      <p class="auth-card__message" id="authMessage" role="alert" hidden></p>
 
-      <div class="habit-form__actions">
-        <button type="button" class="btn btn--danger" id="deleteHabitBtn" hidden>
-          Eliminar hábito
-        </button>
-        <div class="habit-form__actions-right">
-          <button type="button" class="btn btn--ghost" id="cancelHabitBtn">Cancelar</button>
-          <button type="submit" class="btn btn--primary" id="submitHabitBtn">Crear hábito</button>
-        </div>
+      <div class="auth-card__actions">
+        <button type="button" class="btn btn--primary" id="loginBtn">Iniciar sesión</button>
+        <button type="button" class="btn btn--ghost" id="signupBtn">Crear cuenta</button>
       </div>
-    </form>
-  </dialog>
+    </div>
+  </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- =========================================
+       El resto de la app: solo visible con sesión activa
+       ========================================= -->
+  <div id="appShell" hidden>
 
+    <header class="app-header">
+      <div class="app-header__brand">
+        <span class="app-header__logo">HabiTrack</span>
+        <span class="app-header__tagline">Tus hábitos hablan por ti</span>
+      </div>
+      <div class="app-header__row">
+        <p class="app-header__date" id="todayLabel"></p>
+        <button type="button" class="app-header__logout" id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <main class="view" id="todayView">
+
+      <section class="overview" id="overviewStrip">
+        <div class="overview__header">
+          <span class="overview__title">Tu constancia</span>
+          <span class="overview__fraction" id="overviewFraction"></span>
+        </div>
+
+        <div class="overview__nav">
+          <button type="button" class="overview__nav-btn" id="prevMonthBtn" aria-label="Mes anterior">‹</button>
+          <span class="overview__month-label" id="overviewMonthLabel"></span>
+          <button type="button" class="overview__nav-btn" id="nextMonthBtn" aria-label="Mes siguiente">›</button>
+        </div>
+
+        <div class="overview__weekdays">
+          <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+        </div>
+
+        <div class="overview__grid" id="overviewGrid"></div>
+      </section>
+
+      <div class="habit-list" id="habitList">
+        <!-- Los hábitos se renderizan aquí dinámicamente desde app.js -->
+      </div>
+
+      <p class="empty-state" id="emptyState" hidden>
+        Todavía no tienes hábitos. Toca el botón "+" para crear el primero.
+      </p>
+
+    </main>
+
+    <button class="fab" id="newHabitBtn" aria-label="Nuevo hábito">
+      <span aria-hidden="true">+</span>
+    </button>
+
+    <dialog class="habit-modal" id="habitModal">
+      <form class="habit-form" id="habitForm">
+        <h2 class="habit-form__title" id="habitModalTitle">Nuevo hábito</h2>
+
+        <label class="field-label" for="habitName">Nombre</label>
+        <input
+          type="text"
+          id="habitName"
+          class="text-input"
+          maxlength="40"
+          placeholder="p. ej. Leer 20 minutos"
+          required
+        >
+
+        <fieldset class="field-group">
+          <legend class="field-label">Frecuencia</legend>
+          <div class="radio-row">
+            <label class="radio-pill">
+              <input type="radio" name="frequency" value="daily" checked>
+              <span>Diario</span>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="frequency" value="weekly">
+              <span>Semanal</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend class="field-label">Prioridad</legend>
+          <div class="radio-row priority-row">
+            <label class="radio-pill" data-level="high">
+              <input type="radio" name="priority" value="high">
+              <span>Alta</span>
+            </label>
+            <label class="radio-pill" data-level="medium">
+              <input type="radio" name="priority" value="medium" checked>
+              <span>Media</span>
+            </label>
+            <label class="radio-pill" data-level="low">
+              <input type="radio" name="priority" value="low">
+              <span>Baja</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="habit-form__actions">
+          <button type="button" class="btn btn--danger" id="deleteHabitBtn" hidden>
+            Eliminar hábito
+          </button>
+          <div class="habit-form__actions-right">
+            <button type="button" class="btn btn--ghost" id="cancelHabitBtn">Cancelar</button>
+            <button type="submit" class="btn btn--primary" id="submitHabitBtn">Crear hábito</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/mockData.js"></script>
   <script src="js/app.js"></script>
 </body>

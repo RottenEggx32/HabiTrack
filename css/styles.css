@@ -69,8 +69,97 @@ body {
 }
 
 /* =========================================
-   Header
+   Pantalla de login / registro
    ========================================= */
+.auth-view {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-card__logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.auth-card__tagline {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.auth-card__message {
+  font-size: 0.82rem;
+  color: var(--mint);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.auth-card__message--error {
+  color: var(--priority-high);
+}
+
+.auth-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.auth-card__actions .btn {
+  width: 100%;
+  padding: 11px 16px;
+}
+
+/* =========================================
+   Encabezado: fila con fecha + cerrar sesión
+   ========================================= */
+.app-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.app-header__date {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.app-header__logout {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  flex-shrink: 0;
+}
+
+.app-header__logout:hover {
+  color: var(--text-primary);
+}
+
+.app-header__logout:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
 .app-header {
   padding: 28px var(--page-padding) 20px;
   border-bottom: 1px solid var(--border);
@@ -93,13 +182,6 @@ body {
 .app-header__tagline {
   font-size: 0.8rem;
   color: var(--text-secondary);
-}
-
-.app-header__date {
-  margin-top: 6px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  text-transform: capitalize;
 }
 
 /* =========================================
